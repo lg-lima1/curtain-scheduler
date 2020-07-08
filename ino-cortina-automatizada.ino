@@ -1,4 +1,5 @@
 // Bibliotecas
+#include <LiquidCrystal.h>
 #include <Stepper.h>
 
 // Macros
@@ -15,6 +16,14 @@
 #define M3 24
 #define M4 25
 #define HOME_SWITCH A0
+
+// PinOut - LCD
+#define RS 2
+#define E 3
+#define D4 4
+#define D5 5
+#define D6 6
+#define D7 7
 
 // Estrutura de variáveis referentes ao motor de passo, e acionamentos relacionados
 struct AxisData
@@ -41,6 +50,7 @@ enum MachineState
 
 // Declaração de bibliotecas externas
 Stepper stepper = Stepper(axisData.stepsPerRevolution, M1, M3, M2, M4);
+LiquidCrystal lcd = LiquidCrystal(RS, E, D4, D5, D6, D7);
 
 void setup()
 {
@@ -48,6 +58,9 @@ void setup()
   // Inicializa porta serial com baud rate de 115200 bps
   Serial.begin(115200);
 #endif
+
+  // Setup - LCD
+  lcd.begin(16, 2);
 
   // Setup - Botões
   pinMode(BTN_ONE, INPUT_PULLUP);
@@ -57,6 +70,14 @@ void setup()
   // Setup - Stepper
   pinMode(HOME_SWITCH, INPUT_PULLUP);
   stepper.setSpeed(500);
+
+  // Delay de Inicialização
+  lcd.setCursor(0, 0);
+  lcd.print("CORTINA         ");
+  lcd.setCursor(0, 1);
+  lcd.print("    AUTOMATIZADA");
+  delay(5000);
+  lcd.clear();
 }
 
 void loop()
@@ -83,15 +104,23 @@ void loop()
         axisData.closed = false;
         axisData.turns = 0.0f;
       }
+      lcd.setCursor(0, 0);
+      lcd.print("REFERENCIADO!   ");
+      machineState = CHECK_BUTTTONS;
     }
     else
     {
+      lcd.setCursor(0, 0);
+      lcd.print("REFERENCIANDO...");
       stepper.step(-1 * axisData.stepsPerRevolution);
     }
 
     break;
 
   case CHECK_BUTTTONS:
+    lcd.setCursor(0, 0);
+    lcd.print("HORA ATUAL      ");
+
     if (buttonOne)
       if (!axisData.opened)
         machineState = OPEN_WINDOW;
@@ -103,6 +132,10 @@ void loop()
     break;
 
   case OPEN_WINDOW:
+    lcd.setCursor(0, 0);
+    lcd.print("COMANDO         ");
+    lcd.setCursor(0, 1);
+    lcd.print("ABRINDO JANELA  ");
     axisData.opened = true;
     axisData.closed = false;
     stepper.step(getAbsoluteSteps(0));
@@ -110,6 +143,10 @@ void loop()
     break;
 
   case CLOSE_WINDOW:
+    lcd.setCursor(0, 0);
+    lcd.print("COMANDO         ");
+    lcd.setCursor(0, 1);
+    lcd.print("FECHANDO JANELA ");
     axisData.opened = false;
     axisData.closed = true;
     stepper.step(getAbsoluteSteps(axisData.length));
@@ -131,6 +168,9 @@ void loop()
   Serial.print(buttonOne);
   Serial.print(buttonTwo);
   Serial.print(buttonThree);
+
+  Serial.print("machineState: ");
+  Serial.println(machineState);
 
   Serial.print("axisData : ");
   Serial.print(axisData.turns);
