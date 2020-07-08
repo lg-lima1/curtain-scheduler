@@ -316,14 +316,14 @@ void loop()
     if (buttonOne)
     {
       lastScreenChangeMs = millis();
-      opData.increaseTime(&opData.openTime, 10);
+      opData.increaseTime(&opData.openTime, 5);
       delay(250);
     }
 
     if (buttonTwo)
     {
       lastScreenChangeMs = millis();
-      opData.decreaseTime(&opData.openTime, 10);
+      opData.decreaseTime(&opData.openTime, 5);
       delay(250);
     }
 
