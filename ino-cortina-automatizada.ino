@@ -1,3 +1,6 @@
+// Bibliotecas
+#include <Stepper.h>
+
 // Macros
 #define DEBUG 1
 
@@ -5,6 +8,28 @@
 #define BTN_ONE A1
 #define BTN_TWO A2
 #define BTN_THREE A3
+
+// PinOut - Stepper
+#define M1 22
+#define M2 23
+#define M3 24
+#define M4 25
+#define HOME_SWITCH A0
+
+// Estrutura de variáveis referentes ao motor de passo, e acionamentos relacionados
+struct AxisData
+{
+  int stepsPerRevolution = 64;
+  int ratio = 32;
+  int length = 10; // Voltas
+  float turns = 0.0;
+  bool opened = false;
+  bool closed = false;
+  bool homed = false;
+} axisData;
+
+// Declaração de bibliotecas externas
+Stepper stepper = Stepper(axisData.stepsPerRevolution, M1, M3, M2, M4);
 
 void setup()
 {
@@ -17,14 +42,21 @@ void setup()
   pinMode(BTN_ONE, INPUT_PULLUP);
   pinMode(BTN_TWO, INPUT_PULLUP);
   pinMode(BTN_THREE, INPUT_PULLUP);
+
+  // Setup - Stepper
+  pinMode(HOME_SWITCH, INPUT_PULLUP);
+  stepper.setSpeed(500);
 }
 
 void loop()
 {
   // Verifica estado dos botões a cada ciclo
+  bool homeSwitchState = !digitalRead(HOME_SWITCH);
   bool buttonOne = !digitalRead(BTN_ONE);
   bool buttonTwo = !digitalRead(BTN_TWO);
   bool buttonThree = !digitalRead(BTN_THREE);
+
+  stepper.step(100);
 
 #if DEBUG
   Serial.println("-----------");
@@ -33,5 +65,27 @@ void loop()
   Serial.print(buttonOne);
   Serial.print(buttonTwo);
   Serial.print(buttonThree);
+
+  Serial.print("axisData : ");
+  Serial.print(axisData.turns);
+  Serial.print(", ");
+  Serial.print(axisData.opened);
+  Serial.print(", ");
+  Serial.print(axisData.closed);
+  Serial.print(", ");
+  Serial.println(axisData.homed);
 #endif
+}
+
+long getAbsoluteSteps(float act)
+{
+  float newTurns = act - axisData.turns;
+  axisData.turns = act;
+  return newTurns * axisData.ratio * axisData.stepsPerRevolution;
+}
+
+long getRelativeSteps(float act)
+{
+  axisData.turns += act;
+  return (act * axisData.ratio * axisData.stepsPerRevolution);
 }
