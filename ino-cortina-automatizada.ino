@@ -28,6 +28,17 @@ struct AxisData
   bool homed = false;
 } axisData;
 
+// Enumerador para máquina de estado
+enum MachineState
+{
+  INITIALIZE = 0,
+  HOMING,
+  CHECK_BUTTTONS,
+  OPEN_WINDOW,
+  CLOSE_WINDOW,
+  END_STATE
+} machineState;
+
 // Declaração de bibliotecas externas
 Stepper stepper = Stepper(axisData.stepsPerRevolution, M1, M3, M2, M4);
 
@@ -56,7 +67,62 @@ void loop()
   bool buttonTwo = !digitalRead(BTN_TWO);
   bool buttonThree = !digitalRead(BTN_THREE);
 
-  stepper.step(100);
+  switch (machineState)
+  {
+  case INITIALIZE:
+    machineState = HOMING;
+    break;
+
+  case HOMING:
+    if (axisData.homed || homeSwitchState)
+    {
+      if (!axisData.homed)
+      {
+        axisData.homed = true;
+        axisData.opened = true;
+        axisData.closed = false;
+        axisData.turns = 0.0f;
+      }
+    }
+    else
+    {
+      stepper.step(-1 * axisData.stepsPerRevolution);
+    }
+
+    break;
+
+  case CHECK_BUTTTONS:
+    if (buttonOne)
+      if (!axisData.opened)
+        machineState = OPEN_WINDOW;
+
+    if (buttonTwo)
+      if (!axisData.closed)
+        machineState = CLOSE_WINDOW;
+
+    break;
+
+  case OPEN_WINDOW:
+    axisData.opened = true;
+    axisData.closed = false;
+    stepper.step(getAbsoluteSteps(0));
+    machineState = END_STATE;
+    break;
+
+  case CLOSE_WINDOW:
+    axisData.opened = false;
+    axisData.closed = true;
+    stepper.step(getAbsoluteSteps(axisData.length));
+    machineState = END_STATE;
+    break;
+
+  case END_STATE:
+    machineState = HOMING;
+    break;
+
+  default:
+    break;
+  }
 
 #if DEBUG
   Serial.println("-----------");
