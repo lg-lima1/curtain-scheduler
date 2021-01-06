@@ -1,10 +1,12 @@
-# ino-cortina-automatizada
-Projeto final da matéria de Prática Profissional: Fundamentos e Aplicações com Eletricidade. Curso de Engenharia Elétrica.
+# Curtain Scheduler
+Project developed for the final exam on Electrical Engineering: Practical Applications course.
 
-# Proposta
-O projeto tem apenas duas premissas iniciais:
-- 1. Utilizar o Arduino como microcontrolador da aplicação.
-- 2. Fazer algum tipo de movimentação utilizando um motor de passo convencional.
+Enables any curtain to have scheduled open and close times. This is possible due to the stepper motor, that can be in any size, and an RTC module, that is responsible for enabling RTC capability on the Arduino. Last but not least, all the code was developed for the Arduino board using a few libraries.
 
-# Objetivo
-Seguindo as premissas e adicionando certa complexidade ao projeto, o presente repositório é o resultado de alguns dias de desenvolvimento (e banhos longos também). A proposta da equipe foi desenvolver um protótipo de produto que seria aplicado a automatização de uma cortina. Tal produto não tem caráter comercial, apenas para desenvolvimento do conhecimento e das práticas necessárias utilizando as premissas previamente declaradas.
+# Hardware
+  - Arduino (Uno or Mega)
+  - Stepper Motor and Driver
+  - 16x2 LCD Display
+  - RTC Module
+  - Periphery (buttons, power supply and a switch)
+  
